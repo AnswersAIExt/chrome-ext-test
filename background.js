@@ -11,7 +11,7 @@ chrome.runtime.onInstalled.addListener(function () {
     chrome.storage.local.set({ chatHistory: [] });
 
     // Open the options page
-    chrome.runtime.openOptionsPage();
+    // chrome.runtime.openOptionsPage();
 });
 
 // Listen for messages from the popup script
@@ -39,6 +39,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
         chatHistory.push({ role: "user", content: message.userInput });
 
         if (apiModel === "dall-e-3") {
+            /**
             // Send the user's message to the OpenAI API
             const response = await fetchImage(message.userInput, apiKey, apiModel);
 
@@ -58,9 +59,11 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
                 console.log("Sent image URL to popup:", imageUrl);
             }
             return true; // Enable response callback
+            */
         } else {
             // Send the user's message to the OpenAI API
-            const response = await fetchChatCompletion(chatHistory, apiKey, apiModel);
+            // const response = await fetchChatCompletion(chatHistory, apiKey, apiModel);
+            const response = await getAnswer(chatHistory, apiKey, apiModel);
 
             if (response && response.choices && response.choices.length > 0) {
 
@@ -84,6 +87,36 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
 
     return true; // Enable response callback
 });
+
+const simulateNetworkDelay = (response, delay = 200) => {
+    return new Promise((resolve) => setTimeout(() => resolve(response), delay));
+};
+
+/**
+ * Mock getAnswer function
+ * @param {string} q 
+ * @returns {Promise<string>}
+ */
+function getAnswer(chatHistory) {
+    /**
+     * @type {Object<{role: string, content: string}>}
+     */
+    const q = chatHistory[chatHistory.length - 1].content;
+    
+    console.log(`Mock getAnswer called with question: ${q}`);
+
+    const mockAnswers = {
+        'hello': 'Hello there!',
+        'what is your name': 'I am a mock AI assistant.',
+        'how are you': 'I am functioning within normal parameters.',
+        'long answer': `It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).`
+    };
+
+    const lowerQ = q.trim().toLowerCase();
+    const answer = mockAnswers[lowerQ] || `I'm not sure how to answer that, but I'm learning! Try: ${Object.keys(mockAnswers).join(', ')}`;
+
+    return simulateNetworkDelay({choices: [{message: {content: answer}}]});
+}
 
 // Fetch data from the OpenAI Chat Completion API
 async function fetchChatCompletion(messages, apiKey, apiModel) {

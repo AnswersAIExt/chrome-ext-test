@@ -5,11 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const clearChatBtn = document.getElementById('clear-chat-btn');
 
     // If the user has not entered an API key, open the options page
-    chrome.storage.local.get('apiKey', ({ apiKey }) => {
-        if (!apiKey || apiKey.length < 10) {
-            chrome.runtime.openOptionsPage();
-        }
-    });
+    // chrome.storage.local.get('apiKey', ({ apiKey }) => {
+    //     if (!apiKey || apiKey.length < 10) {
+    //         chrome.runtime.openOptionsPage();
+    //     }
+    // });
 
     // Fetch chat history from local storage and display it
     chrome.storage.local.get(['chatHistory'], function (result) {
@@ -122,52 +122,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // check of message starts with a dall-e image URL
         if (content.startsWith('https://oaidalleapiprodscus.blob.core.windows.net/')) {
-            const imageElement = document.createElement('img');
-            imageElement.src = content;
-            messageElement.appendChild(imageElement);
+            // const imageElement = document.createElement('img');
+            // imageElement.src = content;
+            // messageElement.appendChild(imageElement);
 
-            // add a download button to the message if it's from the assistant
-            if (role === 'assistant') {
-                // create container for the action buttons
-                const actionBtns = document.createElement('div');
-                actionBtns.className = 'action-btns';
+            // // add a download button to the message if it's from the assistant
+            // if (role === 'assistant') {
+            //     // create container for the action buttons
+            //     const actionBtns = document.createElement('div');
+            //     actionBtns.className = 'action-btns';
 
-                // add the action buttons to the message
-                messageElement.appendChild(actionBtns);
+            //     // add the action buttons to the message
+            //     messageElement.appendChild(actionBtns);
 
-                const downloadIcon = document.createElement('i');
-                downloadIcon.className = 'fa fa-download download-btn';
-                downloadIcon.title = 'Download image';
-                downloadIcon.addEventListener('click', function () {
-                    // download image to the user's device
-                    chrome.downloads.download({
-                        url: content,
-                        filename: 'dall-e-image.png',
-                        saveAs: false
-                    })
-                        .then(() => {
-                            // Change the icon to a check
-                            downloadIcon.className = 'fa fa-check action-btn';
+            //     const downloadIcon = document.createElement('i');
+            //     downloadIcon.className = 'fa fa-download download-btn';
+            //     downloadIcon.title = 'Download image';
+            //     downloadIcon.addEventListener('click', function () {
+            //         // download image to the user's device
+            //         chrome.downloads.download({
+            //             url: content,
+            //             filename: 'dall-e-image.png',
+            //             saveAs: false
+            //         })
+            //             .then(() => {
+            //                 // Change the icon to a check
+            //                 downloadIcon.className = 'fa fa-check action-btn';
 
-                            // Revert to the default icon after 2 seconds
-                            setTimeout(() => {
-                                downloadIcon.className = 'fa fa-download action-btn';
-                            }, 2000);
-                        })
-                        // Display an x icon if the copy operation fails
-                        .catch(() => {
-                            downloadIcon.className = 'fa fa-times action-btn';
+            //                 // Revert to the default icon after 2 seconds
+            //                 setTimeout(() => {
+            //                     downloadIcon.className = 'fa fa-download action-btn';
+            //                 }, 2000);
+            //             })
+            //             // Display an x icon if the copy operation fails
+            //             .catch(() => {
+            //                 downloadIcon.className = 'fa fa-times action-btn';
 
-                            // Revert to the default icon after 2 seconds
-                            setTimeout(() => {
-                                downloadIcon.className = 'fa fa-download action-btn';
-                            }, 2000);
-                        });
+            //                 // Revert to the default icon after 2 seconds
+            //                 setTimeout(() => {
+            //                     downloadIcon.className = 'fa fa-download action-btn';
+            //                 }, 2000);
+            //             });
 
-                });
+            //     });
 
-                actionBtns.appendChild(downloadIcon);
-            }
+            //     actionBtns.appendChild(downloadIcon);
+            // }
 
         } else { // if it's not an image, it's a text message
             // format the message content
