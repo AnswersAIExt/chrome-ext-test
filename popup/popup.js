@@ -4,12 +4,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const sendBtn = document.getElementById('send-btn');
     const clearChatBtn = document.getElementById('clear-chat-btn');
 
-    // If the user has not entered an API key, open the options page
-    // chrome.storage.local.get('apiKey', ({ apiKey }) => {
-    //     if (!apiKey || apiKey.length < 10) {
-    //         chrome.runtime.openOptionsPage();
-    //     }
-    // });
 
     // Fetch chat history from local storage and display it
     chrome.storage.local.get(['chatHistory'], function (result) {
@@ -122,53 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // check of message starts with a dall-e image URL
         if (content.startsWith('https://oaidalleapiprodscus.blob.core.windows.net/')) {
-            // const imageElement = document.createElement('img');
-            // imageElement.src = content;
-            // messageElement.appendChild(imageElement);
-
-            // // add a download button to the message if it's from the assistant
-            // if (role === 'assistant') {
-            //     // create container for the action buttons
-            //     const actionBtns = document.createElement('div');
-            //     actionBtns.className = 'action-btns';
-
-            //     // add the action buttons to the message
-            //     messageElement.appendChild(actionBtns);
-
-            //     const downloadIcon = document.createElement('i');
-            //     downloadIcon.className = 'fa fa-download download-btn';
-            //     downloadIcon.title = 'Download image';
-            //     downloadIcon.addEventListener('click', function () {
-            //         // download image to the user's device
-            //         chrome.downloads.download({
-            //             url: content,
-            //             filename: 'dall-e-image.png',
-            //             saveAs: false
-            //         })
-            //             .then(() => {
-            //                 // Change the icon to a check
-            //                 downloadIcon.className = 'fa fa-check action-btn';
-
-            //                 // Revert to the default icon after 2 seconds
-            //                 setTimeout(() => {
-            //                     downloadIcon.className = 'fa fa-download action-btn';
-            //                 }, 2000);
-            //             })
-            //             // Display an x icon if the copy operation fails
-            //             .catch(() => {
-            //                 downloadIcon.className = 'fa fa-times action-btn';
-
-            //                 // Revert to the default icon after 2 seconds
-            //                 setTimeout(() => {
-            //                     downloadIcon.className = 'fa fa-download action-btn';
-            //                 }, 2000);
-            //             });
-
-            //     });
-
-            //     actionBtns.appendChild(downloadIcon);
-            // }
-
+            // TODO
         } else { // if it's not an image, it's a text message
             // format the message content
             content = formatMessageContent(content);
@@ -284,71 +232,31 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Settings button click event
-    document.getElementById('settings-btn').addEventListener('click', function () {
-        chrome.runtime.openOptionsPage();
+    // Screenshot button click event
+    document.getElementById('screenshot-btn').addEventListener('click', function () {
+        chrome.tabs.captureVisibleTab(null,{},function(dataUri){
+            console.log(dataUri);
+        });
     });
 
-    // Open the dropdown when the button is clicked
-    document.getElementById("model-dropdown-btn").addEventListener("click", function () {
-        var dropdownContent = document.getElementById("model-dropdown-content");
-
-        // Toggle the display property
-        dropdownContent.style.display = (dropdownContent.style.display === "flex") ? "none" : "flex";
-
-        // Add active class to the button if the dropdown is open
-        document.getElementById("model-dropdown-btn").classList.toggle("active", dropdownContent.style.display === "flex");
-    });
-
-
-    // Close the dropdown if the user clicks outside of it
-    window.addEventListener("click", function (event) {
-        if (!event.target.matches('#model-dropdown-btn')) {
-            var dropdownContent = document.getElementById("model-dropdown-content");
-            if (dropdownContent.style.display === "flex") {
-                dropdownContent.style.display = "none";
+    // On image pasted
+    document.onpaste = function (event) {
+        var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        console.log(JSON.stringify(items)); // might give you mime types
+        for (var index in items) {
+            var item = items[index];
+            if (item.kind === 'file') {
+                var blob = item.getAsFile();
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    console.log(event.target.result); // data url!
+                }; 
+                reader.readAsDataURL(blob);
             }
-            // remove active class from the button if the dropdown is closed
-            document.getElementById("model-dropdown-btn").classList.remove("active");
         }
-    });
+    };
 
-    // Handle button clicks in the dropdown
-    var dropdownButtons = document.querySelectorAll(".model-dropdown-btn");
-    dropdownButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-            // Get the ID of the clicked button
-            var buttonId = button.id;
-
-            // Set the localStorage value
-            chrome.storage.local.set({ apiModel: buttonId });
-
-            // Update the text on the main button
-            document.getElementById("model-dropdown-btn-text").innerText = button.innerText;
-
-            // Set active model
-            setActiveModel(buttonId);
-        });
-    });
-
-    // Function to set the active model in the dropdown
-    function setActiveModel(model) {
-        // add active class to the button and remove it from the other buttons
-        dropdownButtons.forEach(function (button) {
-            button.classList.remove("active");
-        });
-        document.getElementById(model).classList.add("active");
-    }
-
-    // Set the active model when the popup is opened
-    chrome.storage.local.get(['apiModel'], function (result) {
-        if (result.apiModel) {
-            // Update the text on the main button
-            document.getElementById("model-dropdown-btn-text").innerText = document.getElementById(result.apiModel).innerText;
-            // Set active model in the dropdown
-            setActiveModel(result.apiModel);
-        }
-    });
+    
 
     function displayAssistanInfo() {
         // Create a div element for the message

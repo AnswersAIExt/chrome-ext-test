@@ -119,7 +119,7 @@ function getAnswer(chatHistory) {
 }
 
 // Fetch data from the OpenAI Chat Completion API
-async function fetchChatCompletion(messages, apiKey, apiModel) {
+async function fetchChatCompletion(messages, apiKey, apiModel='gpt-4.1-nano') {
     try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
@@ -129,7 +129,7 @@ async function fetchChatCompletion(messages, apiKey, apiModel) {
             },
             body: JSON.stringify({
                 "messages": messages,
-                "model": apiModel,
+                "model": 'gpt-4.1-nano',
             })
         });
 

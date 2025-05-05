@@ -13,7 +13,11 @@
     ],
     "permissions": [
         "storage",
-        "downloads"
+        "downloads",
+        "activeTab",
+        "clipboardRead",
+        "desktopCapture",
+        "storage"
     ],
     "background": {
         "service_worker": "background.js"
@@ -21,6 +25,5 @@
     "action": {
         "default_popup": "popup/popup.html"
     },
-    "options_page": "options/options.html",
     "manifest_version": 3
 }
