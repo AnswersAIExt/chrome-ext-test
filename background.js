@@ -4,7 +4,8 @@ let chatHistory;
 // Listen for when the extension is installed
 chrome.runtime.onInstalled.addListener(function () {
     // Set default API model
-    let defaultModel = "gpt-4o";
+    checkAndCleanToken();
+    let defaultModel = "gpt-4.1-nano";
     chrome.storage.local.set({ apiModel: defaultModel });
 
     // Set empty chat history
@@ -12,7 +13,41 @@ chrome.runtime.onInstalled.addListener(function () {
 
     // Open the options page
     // chrome.runtime.openOptionsPage();
+
+    // Periodically check if token expired every 5 minutes
+    setInterval(checkAndCleanToken, 5 * 60 * 1000);
+
+    createContext();
+
 });
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'openSidePanel') {
+      // This will open the panel in all the pages on the current window.
+      chrome.sidePanel.open({ windowId: tab.windowId });
+    }
+  });
+
+function createContext() {
+    chrome.contextMenus.create({
+        id: 'openSidePanel',
+        title: 'Open side panel',
+        contexts: ['all']
+      });
+}
+ 
+  async function checkAndCleanToken() {
+    const { accessToken, expirationTime } = await chrome.storage.local.get(['accessToken', 'expirationTime']);
+  
+    if (accessToken && expirationTime && Date.now() > expirationTime) {
+      console.log('Token expired. Clearing token.');
+      await chrome.storage.local.remove(['accessToken', 'expirationTime']);
+    }
+  }
+
+  chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));
 
 // Listen for messages from the popup script
 chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {

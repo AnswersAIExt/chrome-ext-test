@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Display the image in the chat
             displayMessage('assistant', message.imageUrl);
         } else if (message.fromSelect) {
-            sendMessage(message.fromSelect)
+            setFromSelect(message.fromSelect);
         }
 
         // Enable the send button again
@@ -284,6 +284,7 @@ document.addEventListener('DOMContentLoaded', function () {
         imgElem.src = src;
         imgElem.alt = alt;
         imgElem.className = className;
+        return imgElem;
     }
 
     function hideAssistanInfo() {
@@ -291,5 +292,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (assistantInfo) {
             assistantInfo.remove();
         }
+    }
+
+    async function setFromSelect(text) {
+        const tab = await getCurrentTab();
+        userInput.value = text;
+        chrome.sidePanel.open({ windowId: tab.windowId });
+    }
+
+    async function getCurrentTab() {
+        let queryOptions = { active: true, lastFocusedWindow: true };
+        // `tab` will either be a `tabs.Tab` instance or `undefined`.
+        let [tab] = await chrome.tabs.query(queryOptions);
+        return tab;
     }
 });
