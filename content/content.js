@@ -2,17 +2,22 @@
 
 // Create a tooltip element
 const tooltip = document.createElement('div');
-tooltip.style.position = 'absolute';
-tooltip.style.padding = '6px 10px';
-tooltip.style.background = 'rgba(0, 0, 0, 0.8)';
-tooltip.style.color = '#fff';
-tooltip.style.borderRadius = '6px';
-tooltip.style.fontSize = '14px';
-tooltip.style.cursor = 'pointer';
-tooltip.style.pointerEvents = 'auto'; // Allow clicking
-tooltip.style.zIndex = '9999';
-tooltip.style.display = 'none';
-tooltip.style.whiteSpace = 'nowrap';
+tooltip.style = `
+    text-overflow: ellipsis;
+    max-width: 200px;
+    overflow: hidden;
+    position: absolute;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 9999;
+    display: none;
+    white-space: nowrap;
+`;
 document.body.appendChild(tooltip);
 
 let selectedTextGlobal = '';

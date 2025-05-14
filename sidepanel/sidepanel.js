@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // Fetch chat history from local storage and display it
-    chrome.storage.local.get(['chatHistory'], function (result) {
+    chrome.storage.local.get(['chatHistory', 'selectedTextQueue'], function (result) {
         const chatHistory = result.chatHistory || [];
 
         if (chatHistory.length > 0) {
@@ -21,10 +21,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         checkClearChatBtn();
+
+        // focus on the input field
+        userInput.value = result.selectedTextQueue || '';
+        adjustInputSize(userInput);
+        userInput.focus();
     });
 
-    // focus on the input field
-    userInput.focus();
 
     // disable the send button by default
     sendBtn.disabled = true;
@@ -44,13 +47,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Auto-resize the input field based on the content
-    userInput.addEventListener('input', function () {
-        this.style.height = 'auto'; // Reset the height
-        // Set the height of the input field based on the content
-        this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-        // Enable scrolling if the content is too long
-        this.style.overflowY = this.scrollHeight > 100 ? 'scroll' : 'auto';
-    });
+    userInput.addEventListener('input', (e) => adjustInputSize(e.target));
+
+    function adjustInputSize(input) {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+        input.style.overflowY = input.scrollHeight > 100 ? 'scroll' : 'auto';
+    }
 
     // Send user's input to background script when the send button is clicked
     sendBtn.addEventListener('click', function () {

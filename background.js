@@ -1,6 +1,7 @@
 // Initialize chat history
 let chatHistory;
 let selectedTab;
+let selectedText;
 
 // Listen for when the extension is installed
 chrome.runtime.onInstalled.addListener(function () {
@@ -122,6 +123,8 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
     } else if (message.fromSelect) {
         setFromSelect();
     } else if (message.textSelected) {
+        
+        chrome.storage.local.set({selectedTextQueue: message.textSelected})
         updateSelectedTab();
     }
 
