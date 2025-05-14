@@ -24,6 +24,8 @@ function showTooltip(text, x, y) {
     tooltip.style.top = `${y}px`;
     tooltip.style.display = 'block';
     selectedTextGlobal = text;
+
+    chrome.runtime.sendMessage({textSelected: text});
 }
 
 // Function to hide tooltip
@@ -33,7 +35,7 @@ function hideTooltip() {
 }
 
 // Listen for text selection
-document.addEventListener('mouseup', (event) => {
+document.addEventListener('mouseup', async (event) => {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 

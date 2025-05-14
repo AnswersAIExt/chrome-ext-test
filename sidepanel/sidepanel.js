@@ -294,16 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    async function setFromSelect(text) {
-        const tab = await getCurrentTab();
+    function setFromSelect(text) {
         userInput.value = text;
-        chrome.sidePanel.open({ windowId: tab.windowId });
-    }
-
-    async function getCurrentTab() {
-        let queryOptions = { active: true, lastFocusedWindow: true };
-        // `tab` will either be a `tabs.Tab` instance or `undefined`.
-        let [tab] = await chrome.tabs.query(queryOptions);
-        return tab;
     }
 });

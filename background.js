@@ -1,5 +1,6 @@
 // Initialize chat history
 let chatHistory;
+let selectedTab;
 
 // Listen for when the extension is installed
 chrome.runtime.onInstalled.addListener(function () {
@@ -118,6 +119,10 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
             }
             return true; // Enable response callback
         }
+    } else if (message.fromSelect) {
+        setFromSelect();
+    } else if (message.textSelected) {
+        updateSelectedTab();
     }
 
     return true; // Enable response callback
@@ -226,4 +231,26 @@ function getStorageData(keys) {
     return new Promise((resolve) => {
         chrome.storage.local.get(keys, (result) => resolve(result));
     });
+}
+
+async function getCurrentTab() {
+    let queryOptions = { active: true, lastFocusedWindow: true };
+    // `tab` will either be a `tabs.Tab` instance or `undefined`.
+    let [tab] = await chrome.tabs.query(queryOptions);
+    return tab;
+}
+
+function setFromSelect() {
+    if (!selectedTab) {
+        updateSelectedTab();
+        return;
+    }
+
+    chrome.sidePanel.open({ windowId: selectedTab.windowId });
+}
+
+async function updateSelectedTab() {
+    selectedTab = await getCurrentTab();
+    console.log('selected', selectedTab.windowId);
+    
 }
