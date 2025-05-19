@@ -1,0 +1,40 @@
+.answer-ai-tooltip-container {
+    position: absolute;
+    z-index: 9999;
+    display: none;
+    pointer-events: auto;
+    cursor: pointer;
+}
+.answer-ai-tooltip {
+    width: 116px;
+    min-width: 116px;
+    max-width: 116px;
+    max-height: 32px;
+    min-height: 32px;
+    box-sizing: border-box;
+    position: absolute;
+    padding: 10px;
+    background: linear-gradient(-0.125turn, #670083,#433AAC 60%,#4583FF 100%);
+    color: #fff;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 10px;
+    cursor: pointer;
+    transform: translate(-50%, 0);
+}
+.answer-ai-tooltip svg {
+    margin-right: 4px;
+    margin-bottom: -1px;
+}
+.answer-ai-tooltip::before {
+    content: "";
+    height: 14px;
+    width: 14px;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 4px) rotate(45deg);
+    background-color: rgb(81 35 156);
+    z-index: -1;
+    border-radius: 4px 0;
+}

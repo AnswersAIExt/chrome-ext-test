@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const chatMessages = document.getElementById('chat-messages');
+    const assistantInfoWrapper = document.getElementById('assistant-info-wrapper');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
     const clearChatBtn = document.getElementById('clear-chat-btn');
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
         checkClearChatBtn();
 
         // focus on the input field
-        userInput.value = result.selectedTextQueue || '';
+        // userInput.value = result.selectedTextQueue || '';
         adjustInputSize(userInput);
         userInput.focus();
     });
@@ -51,8 +52,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function adjustInputSize(input) {
         input.style.height = 'auto';
-        input.style.height = Math.min(input.scrollHeight, 100) + 'px';
-        input.style.overflowY = input.scrollHeight > 100 ? 'scroll' : 'auto';
+        input.style.height = Math.min(input.scrollHeight, 150) + 'px';
+        input.style.overflowY = input.scrollHeight > 150 ? 'scroll' : 'auto';
     }
 
     // Send user's input to background script when the send button is clicked
@@ -94,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Enable the send button again
         sendBtn.disabled = false;
         // Add the send icon to the send button and remove the loading indicator
-        sendBtn.innerHTML = '<i class="fa fa-paper-plane"></i>';
+        sendBtn.innerHTML = '<img src="/assets/icons/paper-plane.svg" alt="Send">';
 
         // Enable the input field again
         userInput.disabled = false;
@@ -264,22 +265,28 @@ document.addEventListener('DOMContentLoaded', function () {
     
 
     function displayAssistanInfo() {
-        // Create a div element for the message
-        const messageElement = document.createElement('div');
-        messageElement.id = 'assistant-info-wrapper';
+        // // Create a div element for the message
+        // const messageElement = document.createElement('div');
+        // messageElement.id = 'assistant-info-wrapper';
 
-        // Create an img element for the icon
-        const icon = createImageElem('/assets/icons/icon-128.png', 'assistant-info-icon', 'Assistant icon');
-        messageElement.appendChild(icon);
+        // // Create an img element for the icon
+        // const icon = createImageElem('/assets/icons/icon-128.png', 'assistant-info-icon', 'Assistant icon');
+        // messageElement.appendChild(icon);
 
-        // Create a p element for the text
-        const text = document.createElement('p');
-        text.innerText = 'How can I help you?';
-        text.className = 'assistant-info-text';
-        messageElement.appendChild(text);
+        // // Create a p element for the text
+        // const text = document.createElement('p');
+        // text.innerText = 'How can I help you?';
+        // text.className = 'assistant-info-text';
+        // messageElement.appendChild(text);
 
-        // Append the message element to the chatMessages container
-        chatMessages.appendChild(messageElement);
+        // // Append the message element to the chatMessages container
+        // chatMessages.appendChild(messageElement);
+
+        assistantInfoWrapper.style.display = 'flex';
+    }
+
+    function hideAssistanInfo() {
+        assistantInfoWrapper.style.display = 'none';
     }
 
     function createImageElem(src, className, alt) {
@@ -290,12 +297,12 @@ document.addEventListener('DOMContentLoaded', function () {
         return imgElem;
     }
 
-    function hideAssistanInfo() {
-        const assistantInfo = document.getElementById('assistant-info-wrapper');
-        if (assistantInfo) {
-            assistantInfo.remove();
-        }
-    }
+    // function hideAssistanInfo() {
+    //     const assistantInfo = document.getElementById('assistant-info-wrapper');
+    //     if (assistantInfo) {
+    //         assistantInfo.remove();
+    //     }
+    // }
 
     function setFromSelect(text) {
         userInput.value = text;
