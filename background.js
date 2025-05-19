@@ -6,7 +6,7 @@ let selectedText;
 // Listen for when the extension is installed
 chrome.runtime.onInstalled.addListener(function () {
     // Set default API model
-    checkAndCleanToken();
+    // checkAndCleanToken();
     let defaultModel = "gpt-4.1-nano";
     chrome.storage.local.set({ apiModel: defaultModel });
 
@@ -17,7 +17,9 @@ chrome.runtime.onInstalled.addListener(function () {
     // chrome.runtime.openOptionsPage();
 
     // Periodically check if token expired every 5 minutes
-    setInterval(checkAndCleanToken, 5 * 60 * 1000);
+    // setInterval(checkAndCleanToken, 5 * 60 * 1000);
+
+    // checkAuth();
 
     createContext();
 

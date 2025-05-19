@@ -6,9 +6,9 @@
     cursor: pointer;
 }
 .answer-ai-tooltip {
-    width: 116px;
-    min-width: 116px;
-    max-width: 116px;
+    width: max-content;
+    min-width: max-content;
+    max-width: max-content;
     max-height: 32px;
     min-height: 32px;
     box-sizing: border-box;
