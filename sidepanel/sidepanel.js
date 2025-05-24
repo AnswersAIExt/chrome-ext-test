@@ -88,8 +88,10 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (message.imageUrl) {
             // Display the image in the chat
             displayMessage('assistant', message.imageUrl);
+        } else if (message.userInput) {
+            displayMessage('user', message.userInput);
         } else if (message.fromSelect) {
-            setFromSelect(message.fromSelect);
+            displayMessage('user', message.fromSelect);
         }
 
         // Enable the send button again
@@ -106,11 +108,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const message = { userInput: userMessage };
         // Send the user's message to the background script
         chrome.runtime.sendMessage(message);
-        if (document.getElementById('assistant-info-wrapper')) {
-            hideAssistanInfo();
-        }
+
         // Display the user's message in the chat
-        displayMessage('user', userMessage);
+        // displayMessage('user', userMessage);
     }
 
     // Function to display messages in the chat
@@ -119,6 +119,10 @@ document.addEventListener('DOMContentLoaded', function () {
         // add id to the message element
         messageElement.classList.add('message');
         messageElement.classList.add(role);
+
+        if (document.getElementById('assistant-info-wrapper')) {
+            hideAssistanInfo();
+        }
 
         // check of message starts with a dall-e image URL
         if (content.startsWith('https://oaidalleapiprodscus.blob.core.windows.net/')) {

@@ -12,6 +12,7 @@ chrome.runtime.onInstalled.addListener(function () {
 
     // Set empty chat history
     chrome.storage.local.set({ chatHistory: [] });
+    chrome.storage.local.set({ selectedTextQueue: '' });
 
     // Open the options page
     // chrome.runtime.openOptionsPage();
@@ -35,7 +36,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 function createContext() {
     chrome.contextMenus.create({
         id: 'openSidePanel',
-        title: 'Open side panel',
+        title: 'Open Answer AI',
         contexts: ['all']
       });
 }
@@ -54,79 +55,50 @@ function createContext() {
   .catch((error) => console.error(error));
 
 // Listen for messages from the popup script
+
+async function sendQuestion(question) {
+    const { apiKey, apiModel, chatHistory } = await getStorageData(["apiKey", "apiModel", "chatHistory"]);
+
+    if (!chatHistory || !chatHistory.length === 0) {
+            chatHistory = [
+                { role: "system", content: "I'm your helpful chat bot! I provide helpful and concise answers." }, // TODO: ???
+            ];
+    }
+
+    console.log("sendQu", question);
+    
+    chatHistory.push({ role: "user", content: question });
+
+    const assistantResponse = await sendToOpenAPI(chatHistory, apiKey, apiModel);
+
+    chatHistory.push({ role: "assistant", content: assistantResponse });
+    chrome.storage.local.set({ chatHistory: chatHistory });
+    chrome.runtime.sendMessage({ answer: assistantResponse });
+}
+
+async function sendToOpenAPI(chatHistory, apiKey, apiModel) {
+    // const response = await fetchChatCompletion(chatHistory, apiKey, apiModel);
+    const response = await getAnswer(chatHistory, apiKey, apiModel);
+
+    if (!response || !response.choices || response.choices.length === 0) {
+        return {role: "system", content: 'Error message recieved from AI model'};
+    }
+
+    return response.choices[0].message.content;
+}
+
 chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
 
     if (message.userInput) {
-
-        // Get the API key from local storage
-        const { apiKey } = await getStorageData(["apiKey"]);
-        // Get the model from local storage
-        const { apiModel } = await getStorageData(["apiModel"]);
-
-        // get the chat history from local storage
-        const result = await getStorageData(["chatHistory"]);
-
-        if (!result.chatHistory || result.chatHistory.length === 0) {
-            chatHistory = [
-                { role: "system", content: "I'm your helpful chat bot! I provide helpful and concise answers." },
-            ];
-        } else {
-            chatHistory = result.chatHistory;
-        }
-
-        // save user's message to message array
-        chatHistory.push({ role: "user", content: message.userInput });
-
-        if (apiModel === "dall-e-3") {
-            /**
-            // Send the user's message to the OpenAI API
-            const response = await fetchImage(message.userInput, apiKey, apiModel);
-
-            if (response && response.data && response.data.length > 0) {
-                // Get the image URL
-                const imageUrl = response.data[0].url;
-
-                // Add the assistant's response to the message array
-                chatHistory.push({ role: "assistant", content: imageUrl });
-
-                // save message array to local storage
-                chrome.storage.local.set({ chatHistory: chatHistory });
-
-                // Send the image URL to the popup script
-                chrome.runtime.sendMessage({ imageUrl: imageUrl });
-
-                console.log("Sent image URL to popup:", imageUrl);
-            }
-            return true; // Enable response callback
-            */
-        } else {
-            // Send the user's message to the OpenAI API
-            // const response = await fetchChatCompletion(chatHistory, apiKey, apiModel);
-            const response = await getAnswer(chatHistory, apiKey, apiModel);
-
-            if (response && response.choices && response.choices.length > 0) {
-
-                // Get the assistant's response
-                const assistantResponse = response.choices[0].message.content;
-
-                // Add the assistant's response to the message array
-                chatHistory.push({ role: "assistant", content: assistantResponse });
-
-                // save message array to local storage
-                chrome.storage.local.set({ chatHistory: chatHistory });
-
-                // Send the assistant's response to the popup script
-                chrome.runtime.sendMessage({ answer: assistantResponse });
-
-                console.log("Sent response to popup:", assistantResponse);
-            }
-            return true; // Enable response callback
-        }
+        await sendQuestion(message.userInput);
     } else if (message.fromSelect) {
         setFromSelect();
-    } else if (message.textSelected) {
+        console.log('from select', message.fromSelect);
         
-        chrome.storage.local.set({selectedTextQueue: message.textSelected})
+        await sendQuestion(message.fromSelect);
+    } else if (message.textSelected) {
+        // chrome.storage.local.set({selectedTextQueue: message.textSelected})
+        console.log(message.textSelected);
         updateSelectedTab();
     }
 

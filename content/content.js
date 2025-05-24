@@ -31,34 +31,35 @@ const confettiSvg = `
 
 
 
+const tooltipContainer = document.createElement('div');
+tooltipContainer.classList.add('answer-ai-tooltip-container');
 const tooltip = document.createElement('div');
-tooltip.classList.add('answer-ai-tooltip-container');
-const tooltipBody = document.createElement('div');
-tooltipBody.classList.add('answer-ai-tooltip');
+tooltip.classList.add('answer-ai-tooltip');
 
-tooltipBody.innerHTML = `
+tooltip.innerHTML = `
     ${confettiSvg} Get Answer AI
 `;
 
-tooltip.appendChild(tooltipBody);
-document.body.appendChild(tooltip);
+tooltipContainer.appendChild(tooltip);
+document.body.appendChild(tooltipContainer);
 
-let selectedTextGlobal = '';
+// let selectedTextGlobal = '';
 
 // Function to show tooltip
 function showTooltip(text, x, y) {
-    tooltip.style.left = `${x}px`;
-    tooltip.style.top = `${y}px`;
-    tooltip.style.display = 'block';
-    selectedTextGlobal = text;
+    tooltipContainer.style.left = `${x}px`;
+    tooltipContainer.style.top = `${y}px`;
+    tooltipContainer.style.display = 'block';
+    tooltipContainer.setAttribute("answer-ai-selected", text);
+    // selectedTextGlobal = text;
 
     chrome.runtime.sendMessage({textSelected: text});
 }
 
 // Function to hide tooltip
 function hideTooltip() {
-    tooltip.style.display = 'none';
-    selectedTextGlobal = '';
+    tooltipContainer.style.display = 'none';
+    // selectedTextGlobal = '';
 }
 
 // Listen for text selection
@@ -66,15 +67,21 @@ document.addEventListener('mouseup', async (event) => {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
+    console.log(event.target);
+    
+    if (event.target === tooltip) {
+        tooltipAction();
+        hideTooltip();
+
+        return;
+    }
+
     if (selectedText.length > 0) {
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
-
-        
         const tooltipX = rect.left + window.scrollX + rect.width / 2;
-        const tooltipY = rect.top + window.scrollY - 40; // Position 40px above selection
-        
-        console.log(rect, window.scrollX, tooltipX);
+        const tooltipY = rect.top + window.scrollY - 40;
+
         showTooltip(selectedText, tooltipX, tooltipY);
     } else {
         hideTooltip();
@@ -82,20 +89,25 @@ document.addEventListener('mouseup', async (event) => {
 });
 
 // Hide tooltip when clicking outside
-document.addEventListener('mousedown', (event) => {
-    if (!tooltip.contains(event.target)) {
-        hideTooltip();
-    }
-});
+// document.addEventListener('mousedown', (event) => {
+//     if (!tooltip.contains(event.target)) {
+//         hideTooltip();
+//     }
+// });
 
 // Tooltip click action
-tooltip.addEventListener('click', (event) => {
-    event.stopPropagation(); // Prevent event bubbling
-    tooltipAction(selectedTextGlobal);
-});
+// tooltip.addEventListener('click', (event) => {
+//     // event.preventDefault();
+//     // event.stopImmediatePropagation();
+//     // event.stopPropagation(); // Prevent event bubbling
+//     tooltipAction();
+//         hideTooltip();
+// });
 
 // Define your custom action here
-function tooltipAction(text) {
-    chrome.runtime.sendMessage({fromSelect: tooltip.textContent});
-    hideTooltip();
+function tooltipAction() {
+    const text = tooltipContainer.getAttribute("answer-ai-selected");
+    console.log(text);
+    
+    chrome.runtime.sendMessage({fromSelect: text});
 }
