@@ -7,6 +7,29 @@ body {
     height: 100vh;
 }
 
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #1d0822aa;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+}
+
+.auth-wrapper.hidden {
+    display: none;
+}
+
+.auth-popup{
+    background-color: #2B172F;
+    border: 1px solid #3F2746;
+    border-radius: 12px;
+}
+
 h1,
 h2,
 h3,
