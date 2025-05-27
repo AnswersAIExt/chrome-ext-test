@@ -3,7 +3,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const assistantInfoWrapper = document.getElementById('assistant-info-wrapper');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
+    const loginBtn = document.getElementById('login-btn');
     const clearChatBtn = document.getElementById('clear-chat-btn');
+    const authWrapper = document.querySelector('.auth-wrapper');
 
 
     // Fetch chat history from local storage and display it
@@ -110,11 +112,13 @@ document.addEventListener('DOMContentLoaded', function () {
         chrome.runtime.sendMessage(message);
 
         // Display the user's message in the chat
-        // displayMessage('user', userMessage);
+        displayMessage('user', userMessage);
     }
 
     // Function to display messages in the chat
-    function displayMessage(role, content) {
+    function displayMessage(role, content, isImage = false) {
+        console.log('displayMessage', content);
+        
         const messageElement = document.createElement('div');
         // add id to the message element
         messageElement.classList.add('message');
@@ -125,8 +129,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // check of message starts with a dall-e image URL
-        if (content.startsWith('https://oaidalleapiprodscus.blob.core.windows.net/')) {
-            // TODO
+        if (isImage) {
+            const img = createImageElem(content, 'pasted-image', 'pasted image');
+
+            messageElement.appendChild(img);
         } else { // if it's not an image, it's a text message
             // format the message content
             content = formatMessageContent(content);
@@ -138,41 +144,16 @@ document.addEventListener('DOMContentLoaded', function () {
             if (role === 'assistant') {
                 // create container for the action buttons
                 const actionBtns = document.createElement('div');
-                actionBtns.className = 'action-btns';
 
-                // add the action buttons to the message
+                actionBtns.className = 'action-btns';
                 messageElement.appendChild(actionBtns);
 
-                const copyIcon = document.createElement('i');
-                copyIcon.className = 'fa fa-copy action-btn';
-                copyIcon.title = 'Copy to clipboard';
-                copyIcon.addEventListener('click', function () {
-                    // Copy the message to the clipboard
-                    navigator.clipboard.writeText(content)
-                        .then(() => {
-                            // Change the icon to a check
-                            copyIcon.className = 'fa fa-check action-btn';
-
-                            // Revert to the default icon after 2 seconds
-                            setTimeout(() => {
-                                copyIcon.className = 'fa fa-copy action-btn';
-                            }, 2000);
-                        })
-                        // Display an x icon if the copy operation fails
-                        .catch(() => {
-                            copyIcon.className = 'fa fa-times action-btn';
-
-                            // Revert to the default icon after 2 seconds
-                            setTimeout(() => {
-                                copyIcon.className = 'fa fa-copy action-btn';
-                            }, 2000);
-                        });
-                });
-
+                const copyIcon = createCopyIcon(content)
+                
                 actionBtns.appendChild(copyIcon);
             }
-
         }
+        
         chatMessages.appendChild(messageElement);
 
         // enable the clear chat button
@@ -180,6 +161,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // scroll to the displayed message in the chat-messages div
         messageElement.scrollIntoView();
+    }
+
+    function createCopyIcon(content) {
+        const copyIcon = document.createElement('i');
+        copyIcon.className = 'fa fa-copy action-btn';
+        copyIcon.title = 'Copy to clipboard';
+        copyIcon.addEventListener('click', function () {
+            // Copy the message to the clipboard
+            navigator.clipboard.writeText(content)
+                .then(() => {
+                    // Change the icon to a check
+                    copyIcon.className = 'fa fa-check action-btn';
+
+                    // Revert to the default icon after 2 seconds
+                    setTimeout(() => {
+                        copyIcon.className = 'fa fa-copy action-btn';
+                    }, 2000);
+                })
+                // Display an x icon if the copy operation fails
+                .catch(() => {
+                    copyIcon.className = 'fa fa-times action-btn';
+
+                    // Revert to the default icon after 2 seconds
+                    setTimeout(() => {
+                        copyIcon.className = 'fa fa-copy action-btn';
+                    }, 2000);
+                });
+        });
+
+        return copyIcon;
     }
 
     function formatMessageContent(text) {
@@ -242,6 +253,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    loginBtn.addEventListener('click', function () {
+        if (authWrapper.classList.contains('hidden')) {
+            authWrapper.classList.remove('hidden');
+        } else {
+            authWrapper.classList.add('hidden');
+        }
+    });
+
+    authWrapper.addEventListener('click', () => {
+        abortAuth();
+    });
+
+    function abortAuth() {
+        authWrapper.classList.add('hidden');
+    }
+
     // Screenshot button click event
     // document.getElementById('screenshot-btn').addEventListener('click', function () {
     //     chrome.tabs.captureVisibleTab(null,{},function(dataUri){
@@ -259,7 +286,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 var blob = item.getAsFile();
                 var reader = new FileReader();
                 reader.onload = function (event) {
-                    console.log(event.target.result); // data url!
+                    displayMessage('user', event.target.result, true); // data url!
+                    // TODO: send to background as message
                 }; 
                 reader.readAsDataURL(blob);
             }
@@ -269,23 +297,6 @@ document.addEventListener('DOMContentLoaded', function () {
     
 
     function displayAssistanInfo() {
-        // // Create a div element for the message
-        // const messageElement = document.createElement('div');
-        // messageElement.id = 'assistant-info-wrapper';
-
-        // // Create an img element for the icon
-        // const icon = createImageElem('/assets/icons/icon-128.png', 'assistant-info-icon', 'Assistant icon');
-        // messageElement.appendChild(icon);
-
-        // // Create a p element for the text
-        // const text = document.createElement('p');
-        // text.innerText = 'How can I help you?';
-        // text.className = 'assistant-info-text';
-        // messageElement.appendChild(text);
-
-        // // Append the message element to the chatMessages container
-        // chatMessages.appendChild(messageElement);
-
         assistantInfoWrapper.style.display = 'flex';
     }
 
@@ -300,13 +311,6 @@ document.addEventListener('DOMContentLoaded', function () {
         imgElem.className = className;
         return imgElem;
     }
-
-    // function hideAssistanInfo() {
-    //     const assistantInfo = document.getElementById('assistant-info-wrapper');
-    //     if (assistantInfo) {
-    //         assistantInfo.remove();
-    //     }
-    // }
 
     function setFromSelect(text) {
         userInput.value = text;
